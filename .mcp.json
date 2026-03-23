@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "fino": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "mcp/index.ts"
+      ],
+      "cwd": "/Users/hadijaveed/code-place/personal-finance"
+    }
+  }
+}

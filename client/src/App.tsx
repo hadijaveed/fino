@@ -1,0 +1,23 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Layout } from './components/Layout';
+import { Dashboard } from './pages/Dashboard';
+import { Accounts } from './pages/Accounts';
+import { Transactions } from './pages/Transactions';
+import { Spending } from './pages/Spending';
+import { Import } from './pages/Import';
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/accounts" element={<Accounts />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/spending" element={<Spending />} />
+          <Route path="/import" element={<Import />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
