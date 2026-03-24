@@ -1,16 +1,4 @@
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
-
-const COLORS = [
-  '#34d399', '#60a5fa', '#f472b6', '#fbbf24', '#a78bfa',
-  '#fb923c', '#2dd4bf', '#e879f9', '#38bdf8', '#4ade80',
-];
-
-interface CategoryData {
-  category: string;
-  total: number;
-  count: number;
-  percentage: number;
-}
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, Tooltip } from 'recharts';
 
 interface MonthlyData {
   month: string;
@@ -36,58 +24,6 @@ const tooltipStyle = {
   padding: '8px 12px',
   boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
 };
-
-export function CategoryPieChart({ data }: { data: CategoryData[] }) {
-  if (data.length === 0) {
-    return <div className="text-center py-8 text-muted-foreground">No spending data</div>;
-  }
-
-  return (
-    <ResponsiveContainer width="100%" height={280}>
-      <PieChart>
-        <Pie
-          data={data}
-          dataKey="total"
-          nameKey="category"
-          cx="50%"
-          cy="50%"
-          innerRadius={65}
-          outerRadius={105}
-          paddingAngle={3}
-          strokeWidth={0}
-          label={({ category, percentage, x, y }) => (
-            percentage > 5 ? (
-              <text x={x} y={y} fill="#9ca3af" fontSize={11} fontFamily="DM Sans" textAnchor="middle">
-                {`${category.replace(/_/g, ' ')} ${percentage}%`}
-              </text>
-            ) : null
-          )}
-          labelLine={false}
-        >
-          {data.map((_, i) => (
-            <Cell key={i} fill={COLORS[i % COLORS.length]} opacity={0.85} />
-          ))}
-        </Pie>
-        <Tooltip
-          content={({ active, payload }) => {
-            if (!active || !payload?.length) return null;
-            const d = payload[0].payload as CategoryData;
-            return (
-              <div style={tooltipStyle}>
-                <p style={{ fontWeight: 600, marginBottom: 2, textTransform: 'capitalize' }}>
-                  {d.category.replace(/_/g, ' ').toLowerCase()}
-                </p>
-                <p style={{ color: '#9ca3af', fontSize: 11 }}>
-                  {formatCurrency(d.total)} &middot; {d.count} transactions &middot; {d.percentage}%
-                </p>
-              </div>
-            );
-          }}
-        />
-      </PieChart>
-    </ResponsiveContainer>
-  );
-}
 
 export function MonthlyBarChart({ data }: { data: MonthlyData[] }) {
   if (data.length === 0) {

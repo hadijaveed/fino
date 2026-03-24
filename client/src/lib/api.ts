@@ -86,22 +86,6 @@ export const api = {
   },
 
   // Spending
-  getSpendingByCategory: (startDate?: string, endDate?: string) => {
-    const params = new URLSearchParams();
-    if (startDate) params.set('start_date', startDate);
-    if (endDate) params.set('end_date', endDate);
-    const qs = params.toString();
-    return request<{
-      categories: Array<{
-        category: string;
-        total: number;
-        count: number;
-        percentage: number;
-      }>;
-      total: number;
-    }>(`/spending/by-category${qs ? '?' + qs : ''}`);
-  },
-
   getMonthlySpending: (months?: number) => {
     const params = months ? `?months=${months}` : '';
     return request<Array<{

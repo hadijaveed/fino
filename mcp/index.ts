@@ -292,60 +292,17 @@ server.tool('get_balances', 'Get current balances across all accounts with net w
   return { content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }] };
 }));
 
-server.tool('get_spending_summary', 'Get spending breakdown by category for a date range. Excludes inter-account transfers by default. Auto-syncs with Plaid if data is stale.', {
-  start_date: z.string().optional().describe('Start date (YYYY-MM-DD)'),
-  end_date: z.string().optional().describe('End date (YYYY-MM-DD)'),
-  include_transfers: z.boolean().optional().default(false).describe('Include transfer transactions in spending totals (default false)'),
-}, withFreshData(async ({ start_date, end_date, include_transfers }) => {
-  const conditions = [gt(schema.transactions.amount, 0)];
-  if (start_date) conditions.push(gte(schema.transactions.date, start_date));
-  if (end_date) conditions.push(lte(schema.transactions.date, end_date));
-  if (!include_transfers) {
-    conditions.push(sql`${schema.transactions.categoryPrimary} NOT IN ('TRANSFER_IN', 'TRANSFER_OUT')`);
-  }
-
-  const rows = await db.select({
-    category: schema.transactions.categoryPrimary,
-    total: sql<number>`sum(${schema.transactions.amount})`.as('total'),
-    count: sql<number>`count(*)`.as('count'),
-  })
-    .from(schema.transactions)
-    .where(and(...conditions))
-    .groupBy(schema.transactions.categoryPrimary)
-    .orderBy(desc(sql`total`));
-
-  const grandTotal = rows.reduce((sum, r) => sum + (r.total || 0), 0);
-  const result = rows.map((r) => ({
-    category: r.category || 'Uncategorized',
-    total: Math.round((r.total || 0) * 100) / 100,
-    count: r.count,
-    percentage: grandTotal > 0 ? Math.round(((r.total || 0) / grandTotal) * 100) : 0,
-  }));
-
-  return {
-    content: [{
-      type: 'text' as const,
-      text: JSON.stringify({ categories: result, totalSpending: Math.round(grandTotal * 100) / 100 }, null, 2),
-    }],
-  };
-}));
-
-server.tool('get_monthly_comparison', 'Compare income vs spending month over month. Excludes inter-account transfers by default. Auto-syncs with Plaid if data is stale.', {
+server.tool('get_monthly_comparison', 'Compare income vs spending month over month. Returns raw totals from Plaid data without filtering. Auto-syncs with Plaid if data is stale.', {
   months: z.number().optional().default(3).describe('Number of months to compare (default 3)'),
-  include_transfers: z.boolean().optional().default(false).describe('Include transfer transactions in totals (default false)'),
-}, withFreshData(async ({ months, include_transfers }) => {
+}, withFreshData(async ({ months }) => {
   const now = new Date();
   const startDate = new Date(now.getFullYear(), now.getMonth() - months + 1, 1)
     .toISOString().split('T')[0];
 
-  const transferFilter = include_transfers
-    ? sql`1=1`
-    : sql`${schema.transactions.categoryPrimary} NOT IN ('TRANSFER_IN', 'TRANSFER_OUT')`;
-
   const rows = await db.select({
     month: sql<string>`strftime('%Y-%m', ${schema.transactions.date})`.as('month'),
-    totalSpending: sql<number>`sum(case when ${schema.transactions.amount} > 0 and (${transferFilter}) then ${schema.transactions.amount} else 0 end)`.as('total_spending'),
-    totalIncome: sql<number>`sum(case when ${schema.transactions.amount} < 0 and (${transferFilter}) then abs(${schema.transactions.amount}) else 0 end)`.as('total_income'),
+    totalSpending: sql<number>`sum(case when ${schema.transactions.amount} > 0 then ${schema.transactions.amount} else 0 end)`.as('total_spending'),
+    totalIncome: sql<number>`sum(case when ${schema.transactions.amount} < 0 then abs(${schema.transactions.amount}) else 0 end)`.as('total_income'),
   })
     .from(schema.transactions)
     .where(gte(schema.transactions.date, startDate))

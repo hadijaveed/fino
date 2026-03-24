@@ -2,23 +2,20 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { BalanceCards } from '../components/BalanceCards';
 import { TransactionTable } from '../components/TransactionTable';
-import { CategoryPieChart, MonthlyBarChart } from '../components/SpendingChart';
+import { MonthlyBarChart } from '../components/SpendingChart';
 import { Activity } from 'lucide-react';
 
 export function Dashboard() {
   const [transactions, setTransactions] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
   const [monthly, setMonthly] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       api.getTransactions({ limit: 10 }),
-      api.getSpendingByCategory(),
       api.getMonthlySpending(6),
-    ]).then(([txnData, catData, monthData]) => {
+    ]).then(([txnData, monthData]) => {
       setTransactions(txnData.transactions);
-      setCategories(catData.categories);
       setMonthly(monthData);
     }).catch(console.error)
       .finally(() => setLoading(false));
@@ -44,15 +41,9 @@ export function Dashboard() {
 
       <BalanceCards />
 
-      <div className="grid grid-cols-2 gap-5">
-        <div className="glass-card p-5">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Spending by Category</h3>
-          <CategoryPieChart data={categories} />
-        </div>
-        <div className="glass-card p-5">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Income vs Spending</h3>
-          <MonthlyBarChart data={monthly} />
-        </div>
+      <div className="glass-card p-5">
+        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">Income vs Spending</h3>
+        <MonthlyBarChart data={monthly} />
       </div>
 
       <div>

@@ -1,11 +1,10 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, CreditCard, ArrowLeftRight, PieChart, Sparkles, FileUp } from 'lucide-react';
+import { LayoutDashboard, CreditCard, ArrowLeftRight, Sparkles, FileUp } from 'lucide-react';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/accounts', icon: CreditCard, label: 'Accounts' },
   { to: '/transactions', icon: ArrowLeftRight, label: 'Transactions' },
-  { to: '/spending', icon: PieChart, label: 'Spending' },
   { to: '/import', icon: FileUp, label: 'Import' },
 ];
 

@@ -63,25 +63,6 @@ describe('api client', () => {
     });
   });
 
-  describe('getSpendingByCategory', () => {
-    it('fetches with date range', async () => {
-      const data = { categories: [], total: 0 };
-      const spy = mockFetch(data);
-      await api.getSpendingByCategory('2024-01-01', '2024-01-31');
-      const url = spy.mock.calls[0][0] as string;
-      expect(url).toContain('start_date=2024-01-01');
-      expect(url).toContain('end_date=2024-01-31');
-    });
-
-    it('fetches without dates', async () => {
-      const data = { categories: [], total: 0 };
-      const spy = mockFetch(data);
-      await api.getSpendingByCategory();
-      const url = spy.mock.calls[0][0] as string;
-      expect(url).toBe('/api/spending/by-category');
-    });
-  });
-
   describe('getMonthlySpending', () => {
     it('includes months param', async () => {
       const spy = mockFetch([]);

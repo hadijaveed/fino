@@ -4,36 +4,7 @@ import { and, gte, lte, gt, sql, desc, eq } from 'drizzle-orm';
 
 const spending = new Hono();
 
-// Spending by category for a date range
-spending.get('/by-category', async (c) => {
-  const startDate = c.req.query('start_date');
-  const endDate = c.req.query('end_date');
-
-  const conditions = [gt(schema.transactions.amount, 0)]; // Only outflows
-  if (startDate) conditions.push(gte(schema.transactions.date, startDate));
-  if (endDate) conditions.push(lte(schema.transactions.date, endDate));
-
-  const rows = await db.select({
-    category: schema.transactions.categoryPrimary,
-    total: sql<number>`sum(${schema.transactions.amount})`.as('total'),
-    count: sql<number>`count(*)`.as('count'),
-  })
-    .from(schema.transactions)
-    .where(and(...conditions))
-    .groupBy(schema.transactions.categoryPrimary)
-    .orderBy(desc(sql`total`));
-
-  const grandTotal = rows.reduce((sum, r) => sum + (r.total || 0), 0);
-  const withPercentage = rows.map((r) => ({
-    ...r,
-    category: r.category || 'Uncategorized',
-    percentage: grandTotal > 0 ? Math.round(((r.total || 0) / grandTotal) * 100) : 0,
-  }));
-
-  return c.json({ categories: withPercentage, total: grandTotal });
-});
-
-// Monthly comparison (income vs spending)
+// Monthly comparison (income vs spending) - raw totals, no category filtering
 spending.get('/monthly', async (c) => {
   const months = parseInt(c.req.query('months') || '6');
   const now = new Date();
