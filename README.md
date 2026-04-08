@@ -57,6 +57,8 @@ npm run db:push
 npm run go
 ```
 
+> `db:push` creates the `data/` directory automatically if it doesn't exist.
+
 Open [http://localhost:3001](http://localhost:3001).
 
 ---
